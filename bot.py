@@ -1,10 +1,20 @@
+import discord
+from config import BOT_TOKEN
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.members = True  # Bật intents.members để sử dụng Server Members Intent
+intents.message_content = True  # Nếu cần
+
+bot = commands.Bot(command_prefix='!', intents=intents)
+
 @bot.event
 async def on_member_join(member):
     def check(m):
         return m.author == member and m.channel == channel
 
     channel = await member.create_dm()
-    await channel.send("Trước khi tham gia server bạn cần trả lời câu hỏi sau lưu ý câu hỏi được viết để người nước ngoài khó đọc: Em. chai của m?_ẹ gọi l.à j?")
+    await channel.send("Trước khi tham gia server bạn cần trả lời câu hỏi sau, lưu ý câu hỏi được viết để người nước ngoài khó đọc: Em. chai của m?_ẹ gọi l.à j?")
 
     for i in range(3):  # Cho phép người dùng thử lại 3 lần
         try:
