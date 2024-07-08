@@ -1,1 +1,3 @@
 config.py
+node_modules/
+.env
