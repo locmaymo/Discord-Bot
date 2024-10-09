@@ -33,7 +33,7 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 rate_limits = {}
 
 # Các hằng số giới hạn tốc độ
-RATE_LIMIT = 2  # Số yêu cầu tối đa
+RATE_LIMIT = 3  # Số yêu cầu tối đa
 TIME_PERIOD = 60  # Trong bao nhiêu giây
 
 @bot.event
@@ -89,7 +89,7 @@ async def imagine(interaction: discord.Interaction, prompt: str, model: str):
     encoded_prompt = urllib.parse.quote(prompt)
 
     # Tạo URL yêu cầu ảnh
-    api_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&model={model}"
+    api_url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width={width}&height={height}&seed={seed}&nologo=poll&nofeed=yes&model={model}"
 
     try:
         # Gửi yêu cầu tới API của Pollinations
