@@ -5,7 +5,7 @@ services:
     env_file:
       - ./.env
 
-  bot-SillyTavern:
+  bot-sillytavern:
     build: ./bot-SillyTavern
     restart: always
     env_file:
