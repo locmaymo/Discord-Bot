@@ -1,13 +1,21 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from config import POLLINATIONS_BOT_TOKEN
+from dotenv import load_dotenv
 import requests
 import time
 import urllib.parse
 import os
 import random
 from datetime import datetime, timedelta
+
+
+# Định nghĩa đường dẫn tới tệp .env trong thư mục gốc
+dotenv_path = Path(__file__).parents[1] / '.env'
+load_dotenv(dotenv_path=dotenv_path)
+
+# Lấy biến môi trường dành cho bot này
+TOKEN = os.getenv('BOT_PROXYAI_ARTIST')
 
 # Danh sách các model hợp lệ
 VALID_MODELS = [
@@ -133,4 +141,4 @@ async def imagine(interaction: discord.Interaction, prompt: str, model: str):
         print(e)
 
 # Chạy bot
-bot.run(POLLINATIONS_BOT_TOKEN)
+bot.run(TOKEN)

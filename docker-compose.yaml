@@ -1,0 +1,12 @@
+services:
+  bot-image:
+    build: ./bot-image
+    restart: always
+    env_file:
+      - ./.env
+
+  bot-SillyTavern:
+    build: ./bot-SillyTavern
+    restart: always
+    env_file:
+      - ./.env

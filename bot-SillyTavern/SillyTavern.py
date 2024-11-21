@@ -1,6 +1,9 @@
 import discord
-from config import BOT_TOKEN
+from dotenv import load_dotenv
 from discord.ext import commands
+
+# Lấy biến môi trường dành cho bot này
+TOKEN = os.getenv('BOT_SILLYTAVERN')
 
 intents = discord.Intents.default()
 intents.members = True  # Bật intents.members để sử dụng Server Members Intent
@@ -33,4 +36,4 @@ async def on_member_join(member):
     # Nếu người dùng không trả lời đúng sau 3 lần thử, thông báo cho họ
     await channel.send("Bạn đã thử sai quá nhiều lần. Vui lòng tham gia lại bằng lời mời.")
 
-bot.run(BOT_TOKEN)
+bot.run(TOKEN)
