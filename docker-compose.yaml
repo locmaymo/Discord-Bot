@@ -1,18 +1,18 @@
 services:
   bot-image:
-    image: ghcr.io/username/bot-image:tag
+    image: ghcr.io/locmaymo/bot-image:latest
     restart: always
     env_file:
       - ./.env
 
   bot-sillytavern:
-    image: ghcr.io/username/bot-sillytavern:tag
+    image: ghcr.io/locmaymo/bot-sillytavern:latest
     restart: always 
     env_file:
       - ./.env
 
   bot-miu:
-    image: ghcr.io/username/bot-miu:tag
+    image: ghcr.io/locmaymo/bot-miu:latest
     restart: always
     env_file:
       - ./.env
