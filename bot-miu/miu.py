@@ -65,9 +65,9 @@ async def on_message(message):
     global user_chat_count
     user_id = message.author.id
     
-    # Lấy 10 tin nhắn gần nhất làm bối cảnh
+    # Lấy 50 tin nhắn gần nhất làm bối cảnh
     history = []
-    async for msg in message.channel.history(limit=10):
+    async for msg in message.channel.history(limit=50):
         if msg.author != bot.user:
             history.append(f"{msg.author.name}: {msg.content}")
     history.reverse()
