@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Lệnh chạy bot
-CMD ["python", "SillyTavern.py"]
+CMD ["python", "sillytavern.py"]

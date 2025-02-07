@@ -11,4 +11,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Lệnh chạy bot
-CMD ["python", "Miu.py"]
+CMD ["python", "miu.py"]
