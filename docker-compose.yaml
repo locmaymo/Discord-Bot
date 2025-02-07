@@ -1,12 +1,18 @@
 services:
   bot-image:
-    build: ./bot-image
+    image: ghcr.io/username/bot-image:tag
     restart: always
     env_file:
       - ./.env
 
   bot-sillytavern:
-    build: ./bot-SillyTavern
+    image: ghcr.io/username/bot-sillytavern:tag
+    restart: always 
+    env_file:
+      - ./.env
+
+  bot-miu:
+    image: ghcr.io/username/bot-miu:tag
     restart: always
     env_file:
       - ./.env
