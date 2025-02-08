@@ -9,11 +9,12 @@ from discord.ext import commands
 # load_dotenv()
 load_dotenv()
 
-API_KEY = os.getenv('PROXYVN_API_KEY')
+OPENAI_BASE_URL = os.getenv('OPENAI_BASE_URL')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 BOT_MIU = os.getenv('BOT_MIU')
 
 # Khởi tạo client OpenAI
-client = OpenAI(base_url="https://proxyvn.top/v1", api_key=API_KEY)
+client = OpenAI(base_url=OPENAI_BASE_URL, api_key=OPENAI_API_KEY)
 
 # Cấu hình intents
 intents = discord.Intents.default()
@@ -74,18 +75,26 @@ async def on_message(message):
     
     # Kiểm tra nếu người dùng khởi tạo cuộc trò chuyện
     if "Miu ơi" in message.content or bot.user in message.mentions:
-        user_chat_count[user_id] = 2  # Cho phép bot phản hồi 2 lần sau tin nhắn init
+        user_chat_count[user_id] = 3  # Cho phép bot phản hồi 3 lần sau tin nhắn init
         async with message.channel.typing():
             response = generate_miu_response(history, message.content)
             await message.reply(response, mention_author=True)
     elif user_id in user_chat_count and user_chat_count[user_id] > 0:
-        # Nếu người dùng đã init chat trước đó, bot sẽ tiếp tục trò chuyện 2 lần nữa
+        # Nếu người dùng đã init chat trước đó, bot sẽ tiếp tục trò chuyện 3 lần nữa
         async with message.channel.typing():
             response = generate_miu_response(history, message.content)
             await message.reply(response, mention_author=True)
         user_chat_count[user_id] -= 1
         if user_chat_count[user_id] == 0:
             del user_chat_count[user_id]  # Xóa khỏi danh sách nếu hết lượt
+    
+    # Nếu người dùng reply tin nhắn của bot, bot sẽ luôn phản hồi
+    if message.reference and message.reference.resolved:
+        replied_message = message.reference.resolved
+        if replied_message.author == bot.user:
+            async with message.channel.typing():
+                response = generate_miu_response(history, message.content)
+                await message.reply(response, mention_author=True)
     
     await bot.process_commands(message)
 
