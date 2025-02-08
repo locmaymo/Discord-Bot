@@ -34,7 +34,7 @@ system_prompt = {
         "Sử dụng nhiều emoticon hoặc emoji để thể hiện cảm xúc. "
         "Đôi khi pha trộn tiếng Việt và tiếng Anh theo phong cách weeb. "
         "Luôn phản ứng thái quá khi bị trêu chọc. "
-        "Lưu ý: Trả lời trực tiếp nội dung mà không cần thêm prefix 'Miu:' ở đầu câu."
+        "LƯU Ý VIẾT TIN NHẮN: Trả lời trực tiếp nội dung mà thêm prefix 'Miu:' ở đầu câu."
     )
 }
 
@@ -48,15 +48,15 @@ def generate_miu_response(context, user_message):
             if len(parts) == 2:
                 author, content = parts
                 if author == "Miu":
-                    formatted_history.append({"role": "assistant", "content": content})
+                    formatted_history.append({"role": "assistant", "content": msg})
                 else:
-                    formatted_history.append({"role": "user", "content": content})
+                    formatted_history.append({"role": "user", "content": msg})
 
         messages = [system_prompt] + formatted_history + [{"role": "user", "content": user_message}]
         response = client.chat.completions.create(
             model=current_model,
             messages=messages,
-            max_tokens=150,
+            max_tokens=500,
             temperature=0.8
         )
         return response.choices[0].message.content.strip()
