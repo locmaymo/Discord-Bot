@@ -20,7 +20,7 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-SUPPORTED_MODELS = ["chatgpt-4o-latest", "claude-3-5-sonnet-20241022"]
+SUPPORTED_MODELS = ["chatgpt-4o-latest", "claude-3-5-sonnet-20241022", "gpt-4o-mini"]
 current_model = "chatgpt-4o-latest"
 
 ROLEPLAY_PROMPT = """
@@ -125,7 +125,7 @@ async def set_model(interaction: discord.Interaction, model: app_commands.Choice
 @bot.event
 async def on_ready():
     print(f'🤖 {bot.user} đã sẵn sàng!')
-    await bot.change_presence(activity=discord.Game(name="Watching over you"))
+    await bot.change_presence(activity=discord.Game(name=f"{current_model}"))
     try:
         synced = await bot.tree.sync()
         print(f'✅ Đã đồng bộ {len(synced)} lệnh slash.')
