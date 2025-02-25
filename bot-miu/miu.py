@@ -109,12 +109,13 @@ def generate_miu_response(context, user_message):
         return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"Lỗi API: {e}")
-        return "Hừm... server đang có vấn đề gì đó rồi, thử lại sau đi! (>_<)"
+        return "Hừm... server đang có vấn đề gì đó rồi, thử lại sau đi! (>_<) hoặc nhập command `/setmodel` để chuyển sang model GPT 4o Mini (ổn định)."
 
 @bot.tree.command(name="setmodel", description="Đổi model chat của Miu")
 @app_commands.choices(model=[
     app_commands.Choice(name="ChatGPT-4o latest", value="chatgpt-4o-latest"),
     app_commands.Choice(name="Claude 3.5 Sonnet latest", value="claude-3-5-sonnet-20241022")
+    app_commands.Choice(name="GPT 4o Mini (ổn định)", value="gpt-4o-mini")
 ])
 async def set_model(interaction: discord.Interaction, model: app_commands.Choice[str]):
     global current_model
