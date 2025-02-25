@@ -120,12 +120,14 @@ def generate_miu_response(context, user_message):
 async def set_model(interaction: discord.Interaction, model: app_commands.Choice[str]):
     global current_model
     current_model = model.value
+    # Cập nhật activity mỗi khi model thay đổi
+    await bot.change_presence(activity=discord.CustomActivity(name=f"Đang dùng: {current_model}"))
     await interaction.response.send_message(f"✅ Miu đã đổi sang model `{model.name}`!", ephemeral=True)
 
 @bot.event
 async def on_ready():
     print(f'🤖 {bot.user} đã sẵn sàng!')
-    await bot.change_presence(activity=discord.Game(name=f"{current_model}"))
+    await bot.change_presence(activity=discord.CustomActivity(name=f"Đang dùng: {current_model}"))
     try:
         synced = await bot.tree.sync()
         print(f'✅ Đã đồng bộ {len(synced)} lệnh slash.')
