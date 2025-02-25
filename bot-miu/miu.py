@@ -114,7 +114,7 @@ def generate_miu_response(context, user_message):
 @bot.tree.command(name="setmodel", description="Đổi model chat của Miu")
 @app_commands.choices(model=[
     app_commands.Choice(name="ChatGPT-4o latest", value="chatgpt-4o-latest"),
-    app_commands.Choice(name="Claude 3.5 Sonnet latest", value="claude-3-5-sonnet-20241022")
+    app_commands.Choice(name="Claude 3.5 Sonnet latest", value="claude-3-5-sonnet-20241022"),
     app_commands.Choice(name="GPT 4o Mini (ổn định)", value="gpt-4o-mini")
 ])
 async def set_model(interaction: discord.Interaction, model: app_commands.Choice[str]):
