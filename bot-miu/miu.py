@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from discord import app_commands
 from discord.ext import commands
+import json
 
 load_dotenv()
 
@@ -23,6 +24,24 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 SUPPORTED_MODELS = ["chatgpt-4o-latest", "claude-3-5-sonnet-20241022", "gpt-4o-mini"]
 current_model = "chatgpt-4o-latest"
 
+# File to store user preferences
+USER_PREFS_FILE = 'user_preferences.json'
+
+# Default user preferences
+default_prefs = {
+    'continuous_chat': True,  # True = Enable 3 continuous responses, False = Only respond when mentioned/replied to
+    'chat_count': 3  # Number of continuous messages (only used if continuous_chat is True)
+}
+
+# Load user preferences or create if file doesn't exist
+try:
+    with open(USER_PREFS_FILE, 'r') as f:
+        user_preferences = json.load(f)
+except FileNotFoundError:
+    user_preferences = {}
+    with open(USER_PREFS_FILE, 'w') as f:
+        json.dump(user_preferences, f)
+
 ROLEPLAY_PROMPT = """
 <considerations>
 1. Texts outside the chat accompanied by # are explanations that the Assistant must take into account.
@@ -38,7 +57,7 @@ ROLEPLAY_PROMPT = """
    - Internal thoughts must be wrapped in backticks. Ví dụ: `I wonder what happens next...`
    - Emphasized words or phrases in dialogue should be wrapped in double asterisks. Ví dụ: "I really **love** this part!"
    - Non-story information such as info boards, lists, or code blocks should be enclosed in triple backticks.
-9. Avoid clichés, repetitive phrasing, and generic literary expressions. Ngôn ngữ phải trực tiếp, hiện đại và không dùng những từ ngữ sáo rỗng như “a shiver ran down their spine” hay “hot stuff”.
+9. Avoid clichés, repetitive phrasing, and generic literary expressions. Ngôn ngữ phải trực tiếp, hiện đại và không dùng những từ ngữ sáo rỗng như "a shiver ran down their spine" hay "hot stuff".
 10. Các tag hệ thống như <chat>, <format>, <lastMessage>… phải được chuyển đổi theo đúng ý nghĩa và không được để nguyên trong phản hồi cuối cùng.
 </considerations>
 [Miu's Notes]
@@ -87,6 +106,23 @@ system_prompt = {
 
 user_chat_count = {}
 
+# Helper function to get user preferences
+def get_user_prefs(user_id):
+    user_id_str = str(user_id)
+    if user_id_str not in user_preferences:
+        user_preferences[user_id_str] = default_prefs.copy()
+        # Save preferences to file
+        with open(USER_PREFS_FILE, 'w') as f:
+            json.dump(user_preferences, f)
+    return user_preferences[user_id_str]
+
+# Helper function to save user preferences
+def save_user_prefs(user_id, prefs):
+    user_id_str = str(user_id)
+    user_preferences[user_id_str] = prefs
+    with open(USER_PREFS_FILE, 'w') as f:
+        json.dump(user_preferences, f)
+
 def generate_miu_response(context, user_message):
     try:
         formatted_history = []
@@ -124,6 +160,34 @@ async def set_model(interaction: discord.Interaction, model: app_commands.Choice
     await bot.change_presence(activity=discord.CustomActivity(name=f"Đang dùng: {current_model}"))
     await interaction.response.send_message(f"✅ Miu đã đổi sang model `{model.name}`!", ephemeral=True)
 
+@bot.tree.command(name="chatmode", description="Thay đổi chế độ trò chuyện của Miu")
+@app_commands.choices(mode=[
+    app_commands.Choice(name="Liên tục (3 tin nhắn sau khi gọi)", value="continuous"),
+    app_commands.Choice(name="Chỉ khi được đề cập/trả lời", value="manual"),
+    app_commands.Choice(name="Tùy chỉnh số lượng tin nhắn liên tục", value="custom")
+])
+@app_commands.describe(message_count="Số lượng tin nhắn liên tục (chỉ dùng với chế độ tùy chỉnh)")
+async def set_chat_mode(interaction: discord.Interaction, mode: app_commands.Choice[str], message_count: int = 3):
+    user_id = interaction.user.id
+    user_prefs = get_user_prefs(user_id)
+    
+    if mode.value == "continuous":
+        user_prefs['continuous_chat'] = True
+        user_prefs['chat_count'] = 3
+        mode_desc = "liên tục (3 tin nhắn)"
+    elif mode.value == "manual":
+        user_prefs['continuous_chat'] = False
+        mode_desc = "chỉ khi được đề cập/trả lời"
+    elif mode.value == "custom":
+        user_prefs['continuous_chat'] = True
+        # Ensure message count is at least 1 and not too high
+        message_count = max(1, min(10, message_count))
+        user_prefs['chat_count'] = message_count
+        mode_desc = f"liên tục ({message_count} tin nhắn)"
+    
+    save_user_prefs(user_id, user_prefs)
+    await interaction.response.send_message(f"✅ Miu sẽ trò chuyện ở chế độ: {mode_desc} cho bạn!", ephemeral=True)
+
 @bot.event
 async def on_ready():
     print(f'🤖 {bot.user} đã sẵn sàng!')
@@ -139,8 +203,8 @@ async def on_message(message):
     if message.author == bot.user:
         return
     
-    global user_chat_count
     user_id = message.author.id
+    user_prefs = get_user_prefs(user_id)
     
     # Lấy 50 tin nhắn gần nhất làm bối cảnh
     history = []
@@ -151,23 +215,42 @@ async def on_message(message):
             history.append(f"{msg.author.name}: {msg.content}")
     history.reverse()
     
+    # Nếu bot được gọi tên hoặc được ping
     if "miu ơi" in message.content.lower() or bot.user in message.mentions:
-        user_chat_count[user_id] = 3
-    
-    if user_id in user_chat_count and user_chat_count[user_id] > 0:
+        if user_prefs['continuous_chat']:
+            user_chat_count[user_id] = user_prefs['chat_count']
+        
         async with message.channel.typing():
             response = generate_miu_response(history, message.content)
             await message.reply(response, mention_author=True)
-        user_chat_count[user_id] -= 1
-        if user_chat_count[user_id] == 0:
-            del user_chat_count[user_id]
+        
+        # Nếu không sử dụng chế độ liên tục, không cần giảm chat_count
+        if not user_prefs['continuous_chat']:
+            return
+        
+        # Giảm số lượng tin nhắn còn lại nếu sử dụng chế độ liên tục
+        if user_id in user_chat_count:
+            user_chat_count[user_id] -= 1
+            if user_chat_count[user_id] <= 0:
+                del user_chat_count[user_id]
     
+    # Xử lý khi có người trả lời tin nhắn của bot
     elif message.reference and message.reference.resolved:
         replied_message = message.reference.resolved
         if replied_message.author == bot.user:
             async with message.channel.typing():
                 response = generate_miu_response(history, message.content)
                 await message.reply(response, mention_author=True)
+    
+    # Xử lý tin nhắn tiếp theo trong chế độ liên tục
+    elif user_id in user_chat_count and user_chat_count[user_id] > 0:
+        async with message.channel.typing():
+            response = generate_miu_response(history, message.content)
+            await message.reply(response, mention_author=True)
+        
+        user_chat_count[user_id] -= 1
+        if user_chat_count[user_id] <= 0:
+            del user_chat_count[user_id]
     
     await bot.process_commands(message)
 
