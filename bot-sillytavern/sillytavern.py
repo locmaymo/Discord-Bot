@@ -29,7 +29,7 @@ async def on_ready():
 @bot.event
 async def on_member_join(member):
     # Lấy kênh verify
-    verify_channel = discord.utils.get(member.guild.channels, name="verify")
+    verify_channel = discord.utils.get(member.guild.channels, name="✅┃verify")
     if not verify_channel:
         # Nếu không tìm thấy kênh bằng tên, thử tìm bằng ID
         if VERIFY_CHANNEL_ID:
