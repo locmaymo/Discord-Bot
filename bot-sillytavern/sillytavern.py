@@ -226,6 +226,9 @@ async def namecolor(interaction: discord.Interaction, color: str):
             reason=f"Được tạo bởi {interaction.user.name} để tạo màu cho tên"
         )
 
+        # chờ 1 giây để role được cập nhật
+        await asyncio.sleep(1)
+        
         # Đẩy role lên vị trí cao để ưu tiên hiển thị màu
         bot_top_role = member.guild.me.top_role
         try:
